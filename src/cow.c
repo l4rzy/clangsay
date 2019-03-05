@@ -172,6 +172,7 @@ ERR:
         case    -2:
             fprintf(stderr, "%s: read_cowfile(): load_file_to_array(): %s\n",
                     PROGNAME, strerror(errno));
+            break;
         default:
             if ((*cow)->fp != NULL) {
                 fclose((*cow)->fp);
@@ -261,8 +262,7 @@ int print_cow(COW* cow, COWOPT* opt)
             block = 0;
         }
         if (block == 1)
-            fprintf(stdout, "%s\n",
-                    *(cow->data + i));
+            wprintf(L"%s\n", *(cow->data + i));
         i++;
     }
 
@@ -386,6 +386,7 @@ ERR:
         case    -2:
             fprintf(stderr, "%s: %s: cowfile not found\n",
                     PROGNAME, file);
+            break;
         case    -3:
         default:
             if (envt != NULL)

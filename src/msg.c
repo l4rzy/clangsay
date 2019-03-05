@@ -12,6 +12,7 @@
 
 #include "./config.h"
 #include "./msg.h"
+#include "./cow.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -34,6 +35,9 @@
 #include <regex.h>
 /* WITH_REGEX */
 #endif
+
+/* options */
+extern COWOPT opt;
 
 static int read_msg(MSG** msg, int argc, int optind, char** argv);
 static int print_msg(MSG* msg);
@@ -85,7 +89,7 @@ int read_msg(MSG** msg, int argc, int optind, char** argv)
         (*msg)->lines = 0;
         (*msg)->data = NULL;
     }
-    if (optind < argc) {    
+    if (optind < argc) {
         if (((*msg)->data = (char**)
                     smalloc(sizeof(char*) * (argc - optind), NULL)) == NULL) {
             status = -1; goto ERR;
@@ -157,26 +161,16 @@ int print_msg(MSG* msg)
 #endif
 
     /*
-     * single line
+     * first line
      */
-    putchar(' ');
+    wprintf(L"%lc", opt.border->top_left);
+
     i = maxlen;
     while (i >= 0) {
-        putchar('_');
+        wprintf(L"%lc", opt.border->top);
         i--;
     }
-    if (msg->lines == 1) {
-        fprintf(stdout, "\n< %s >\n ",
-                *(msg->data));
-
-        while (maxlen >= 0) {
-            putchar('-');
-            maxlen--;
-        }
-        puts("");
-
-        return 0;
-    }
+    wprintf(L"%lc%lc", opt.border->top, opt.border->top_right);
 
     /*
      * multi line
@@ -189,36 +183,28 @@ int print_msg(MSG* msg)
         len = mbstrlen(*(msg->data + i));
 /* WITH_REGEX */
 #endif
-        if (i == 0)
-            fprintf(stdout, "\n/ %s",
-                    *(msg->data + i));
-        else if (i == (msg->lines - 1))
-            fprintf(stdout, "\\ %s",
-                    *(msg->data + i));
-        else
-            fprintf(stdout, "| %s",
-                    *(msg->data + i));
+        /* a normal line */
+        wprintf(L"\n%lc %s ", opt.border->left, *(msg->data + i));
 
         j = maxlen - len;
         while (j > 0) {
-            putchar(' ');
+            wprintf(L" ");
             j--;
         }
-
-        if (i == 0)
-            puts(" \\");
-        else if (i == (msg->lines - 1))
-            fprintf(stdout, " /\n ");
-        else
-            puts(" |");
+        wprintf(L"%lc", opt.border->right);
 
         i++;
+        /* end a normal line */
     }
+
+    /* last line */
+    wprintf(L"\n%lc", opt.border->bottom_left);
     while (maxlen >= 0) {
-        putchar('-');
+        wprintf(L"%lc", opt.border->bottom);
         maxlen--;
     }
-    puts("");
+    wprintf(L"%lc%lc\n", opt.border->bottom, opt.border->bottom_right);
+
 #ifdef  WITH_REGEX
     regfree(&reg);
 /* WITH_REGEX */
@@ -324,7 +310,7 @@ int read_recursive_msg(MSG** msg, int fd)
     if ((fp = fdopen(fd, "r")) == NULL) {
         status = -1; goto ERR;
     }
-    if (((*msg)->lines = 
+    if (((*msg)->lines =
                 load_file_to_array(&(*msg)->data, TH_LINES, TH_LENGTH, fp)) < 0) {
         status = -2; goto ERR;
     }

@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <string.h>
 
 #ifdef  WITH_SHARED
 #include <benly/string.h>
@@ -27,6 +28,35 @@
 /* WITH_SHARED */
 #endif
 
+/* border sets
+ */
+const border_t default_border = {
+    L' ', L'_', L' ',
+    L'<',       L'>',
+    L' ', L'-', L' '
+};
+const border_t unicode_border = {
+    L'┌', L'─', L'┐',
+    L'│',       L'│',
+    L'└', L'─', L'┘'
+};
+const border_t bold_border    = {
+    L'┏', L'━', L'┓',
+    L'┃',       L'┃',
+    L'┗', L'━', L'┛'
+};
+
+const border_t rounded_border = {
+    L'╭', L'─', L'╮',
+    L'│',       L'│',
+    L'╰', L'─', L'╯'
+};
+
+//L"╭─╮││╰─╯";
+
+COWOPT  opt     = {
+    COWOPT_ALLNO_FLAGS,
+};
 static void release(COW* cow, MSG* msg);
 
 int main(int argc, char* argv[])
@@ -42,9 +72,15 @@ int main(int argc, char* argv[])
 
     MSG*    msg     = NULL;
 
-    COWOPT  opt     = {
-        COWOPT_ALLNO_FLAGS,
-    };
+
+    /* check for runtime name
+     */
+    if (!memcmp(argv[0], COMPAT_NAME_SAY, strlen(COMPAT_NAME_SAY))) {
+        opt.mode |= MODE_SAY;
+    }
+    if (!memcmp(argv[0], COMPAT_NAME_THINK, strlen(COMPAT_NAME_THINK))) {
+        opt.mode |= MODE_THINK;
+    }
 
     /* option for getopt_long() */
     struct  option opts[] = {
@@ -62,6 +98,7 @@ int main(int argc, char* argv[])
         {"wired",     no_argument,       NULL, 'w'},
         {"youthful",  no_argument,       NULL, 'y'},
         {"list",      no_argument,       NULL, 'l'},
+        {"border",    required_argument, NULL, 'B'},
         {"say",       no_argument,       NULL,  0 },
         {"think",     no_argument,       NULL,  1 },
         {"help",      no_argument,       NULL,  2 },
@@ -70,7 +107,7 @@ int main(int argc, char* argv[])
     };
 
     /* processing of arguments */
-    while ((res = getopt_long(argc, argv, "nbdgpstwye:T:f:R:l", opts, &index)) != -1) {
+    while ((res = getopt_long(argc, argv, "nbdgpstwye:T:f:R:B:l", opts, &index)) != -1) {
         switch (res) {
             case    'e':
                 opt.mode |= MODE_M_EYE;
@@ -118,6 +155,26 @@ int main(int argc, char* argv[])
                 break;
             case    'l':
                 list_cowfiles();
+                break;
+            case    'B':
+                if (!memcmp(optarg, "default", 7)) {
+                    opt.border = &default_border;
+                }
+                else if (!memcmp(optarg, "unicode", 7)) {
+                    opt.border = &unicode_border;
+                }
+                else if (!memcmp(optarg, "bold", 4)) {
+                    opt.border = &bold_border;
+                }
+                else if (!memcmp(optarg, "rounded", 7)) {
+                    opt.border = &rounded_border;
+                }
+                else {
+                    fprintf(stderr, "%s: %s: invalid argument\n",
+                            PROGNAME, optarg);
+                    return -1;
+                }
+                break;
             case    0:
                 opt.mode |= MODE_SAY;
                 break;
@@ -126,8 +183,10 @@ int main(int argc, char* argv[])
                 break;
             case    2:
                 print_usage();
+                break;
             case    3:
                 print_version();
+                break;
             case    '?':
                 return -1;
         }

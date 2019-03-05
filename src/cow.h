@@ -71,12 +71,37 @@ extern "C" {
 #define MODE_M_EYE      (1 << 11)
 #define MODE_M_TONGUE   (1 << 12)
 
+#define TOP_LEFT      0
+#define TOP           1
+#define TOP_RIGHT     2
+#define LEFT          3
+#define RIGHT         4
+#define BOTTOM_LEFT   5
+#define BOTTOM        6
+#define BOTTOM_RIGHT  7
+
+#define COMPAT_NAME_SAY      "cowsay"
+#define COMPAT_NAME_THINK    "cowthink"
+
 #include <stdio.h>
+#include <wchar.h>
 
 typedef struct {
-    int     mode;
-    char*   eye;
-    char*   tongue;
+    wchar_t top_left;
+    wchar_t top;
+    wchar_t top_right;
+    wchar_t left;
+    wchar_t right;
+    wchar_t bottom_left;
+    wchar_t bottom;
+    wchar_t bottom_right;
+} border_t;
+
+typedef struct {
+    int               mode;
+    const border_t*   border;
+    char*             eye;
+    char*             tongue;
 } COWOPT;
 
 typedef struct COW {
@@ -90,6 +115,13 @@ typedef struct COW {
 } COW;
 
 extern int init_cow(COW** cow);
+
+/* border sets
+ */
+extern const border_t default_border;
+extern const border_t unicode_border;
+extern const border_t bold_border;
+extern const border_t rounded_border;
 
 #ifdef  __cplusplus
 }

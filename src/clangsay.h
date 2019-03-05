@@ -18,7 +18,7 @@ extern "C" {
 #endif
 
 #define COWOPT_ALLNO_FLAGS  \
-    0, NULL, NULL
+    0, &default_border, NULL, NULL
 
 #define MODE_MSG_RECURSIVE  (1 << 13)
 
