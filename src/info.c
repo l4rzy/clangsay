@@ -44,6 +44,7 @@ Mandatory arguments to long options are mandatory for short options too.\n\
   -f,  --file=COWFILE        select cow file\n\
   -R,  --recursive=INT       recursive write message box\n\
   -l,  --list                display COWPATH directory and exit\n\
+  -B,  --border=BORDER       either `default`, `unicode`, `bold` or `rounded`\n\
 \n\
        --say                 speaking mode (default)\n\
        --think               thinking mode\n\

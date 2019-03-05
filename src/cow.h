@@ -71,15 +71,6 @@ extern "C" {
 #define MODE_M_EYE      (1 << 11)
 #define MODE_M_TONGUE   (1 << 12)
 
-#define TOP_LEFT      0
-#define TOP           1
-#define TOP_RIGHT     2
-#define LEFT          3
-#define RIGHT         4
-#define BOTTOM_LEFT   5
-#define BOTTOM        6
-#define BOTTOM_RIGHT  7
-
 #define COMPAT_NAME_SAY      "cowsay"
 #define COMPAT_NAME_THINK    "cowthink"
 
