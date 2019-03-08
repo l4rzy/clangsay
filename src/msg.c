@@ -37,7 +37,7 @@
 #endif
 
 /* options */
-extern COWOPT opt;
+extern clangsay_opt_t opt;
 
 static int read_msg(MSG** msg, int argc, int optind, char** argv);
 static int print_msg(MSG* msg);

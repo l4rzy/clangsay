@@ -52,11 +52,18 @@ const border_t rounded_border = {
     L'╰', L'─', L'╯'
 };
 
-//L"╭─╮││╰─╯";
-
-COWOPT  opt     = {
-    COWOPT_ALLNO_FLAGS,
+/* global config struct 
+ */
+clangsay_opt_t opt = {
+    0, //unicode
+    &default_border, //border
+    {
+        0,
+        NULL,
+        NULL,
+    },
 };
+
 static void release(COW* cow, MSG* msg);
 
 int main(int argc, char* argv[])
@@ -76,10 +83,10 @@ int main(int argc, char* argv[])
     /* check for runtime name
      */
     if (!memcmp(argv[0], COMPAT_NAME_SAY, strlen(COMPAT_NAME_SAY))) {
-        opt.mode |= MODE_SAY;
+        opt.cow.mode |= MODE_SAY;
     }
     if (!memcmp(argv[0], COMPAT_NAME_THINK, strlen(COMPAT_NAME_THINK))) {
-        opt.mode |= MODE_THINK;
+        opt.cow.mode |= MODE_THINK;
     }
 
     /* option for getopt_long() */
@@ -110,18 +117,18 @@ int main(int argc, char* argv[])
     while ((res = getopt_long(argc, argv, "nbdgpstwye:T:f:R:B:l", opts, &index)) != -1) {
         switch (res) {
             case    'e':
-                opt.mode |= MODE_M_EYE;
-                opt.eye= optarg;
+                opt.cow.mode |= MODE_M_EYE;
+                opt.cow.eye= optarg;
                 break;
             case    'T':
-                opt.mode |= MODE_M_TONGUE;
-                opt.tongue = optarg;
+                opt.cow.mode |= MODE_M_TONGUE;
+                opt.cow.tongue = optarg;
                 break;
             case    'f':
                 cowfile = optarg;
                 break;
             case    'R':
-                opt.mode |= MODE_MSG_RECURSIVE;
+                opt.cow.mode |= MODE_MSG_RECURSIVE;
                 if (strisdigit(optarg) < 0) {
                     fprintf(stderr, "%s: %s: invalid argument\n",
                             PROGNAME, optarg);
@@ -130,28 +137,28 @@ int main(int argc, char* argv[])
                 rarg = atoi(optarg);
                 break;
             case    'b':
-                opt.mode |= MODE_BORG;
+                opt.cow.mode |= MODE_BORG;
                 break;
             case    'd':
-                opt.mode |= MODE_DEAD;
+                opt.cow.mode |= MODE_DEAD;
                 break;
             case    'g':
-                opt.mode |= MODE_GREEDY;
+                opt.cow.mode |= MODE_GREEDY;
                 break;
             case    'p':
-                opt.mode |= MODE_PARANOID;
+                opt.cow.mode |= MODE_PARANOID;
                 break;
             case    's':
-                opt.mode |= MODE_STONED;
+                opt.cow.mode |= MODE_STONED;
                 break;
             case    't':
-                opt.mode |= MODE_TIRED;
+                opt.cow.mode |= MODE_TIRED;
                 break;
             case    'w':
-                opt.mode |= MODE_WIRED;
+                opt.cow.mode |= MODE_WIRED;
                 break;
             case    'y':
-                opt.mode |= MODE_YOUTHFUL;
+                opt.cow.mode |= MODE_YOUTHFUL;
                 break;
             case    'l':
                 list_cowfiles();
@@ -159,15 +166,19 @@ int main(int argc, char* argv[])
             case    'B':
                 if (!memcmp(optarg, "default", 7)) {
                     opt.border = &default_border;
+                    opt.unicode = 0;
                 }
                 else if (!memcmp(optarg, "unicode", 7)) {
                     opt.border = &unicode_border;
+                    opt.unicode = 1;
                 }
                 else if (!memcmp(optarg, "bold", 4)) {
                     opt.border = &bold_border;
+                    opt.unicode = 1;
                 }
                 else if (!memcmp(optarg, "rounded", 7)) {
                     opt.border = &rounded_border;
+                    opt.unicode = 1;
                 }
                 else {
                     fprintf(stderr, "%s: %s: invalid argument\n",
@@ -176,10 +187,10 @@ int main(int argc, char* argv[])
                 }
                 break;
             case    0:
-                opt.mode |= MODE_SAY;
+                opt.cow.mode |= MODE_SAY;
                 break;
             case    1:
-                opt.mode |= MODE_THINK;
+                opt.cow.mode |= MODE_THINK;
                 break;
             case    2:
                 print_usage();
@@ -224,7 +235,7 @@ int main(int argc, char* argv[])
     }
 
     /* <<<< recursive message box >>>> */
-    if (opt.mode & MODE_MSG_RECURSIVE) {
+    if (opt.cow.mode & MODE_MSG_RECURSIVE) {
         if (msg->recursive(&msg, rarg) < 0) {
             status = 6; goto ERR;
         }
@@ -236,7 +247,7 @@ int main(int argc, char* argv[])
     }
 
     /* print cow */
-    cow->print(cow, &opt);
+    cow->print(cow);
 
     /* release memory */
     release(cow, msg);

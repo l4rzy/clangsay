@@ -33,6 +33,10 @@ extern "C" {
 #define SAY_THOUGHTS    "\\"
 #define THINK_THOUGHTS  "o"
 
+
+#define COWOPT_ALLNO_FLAGS  \
+    0, &default_border, NULL, NULL
+
 /*
  * # reptarg (needle)
  * struct reptarg {
@@ -71,26 +75,11 @@ extern "C" {
 #define MODE_M_EYE      (1 << 11)
 #define MODE_M_TONGUE   (1 << 12)
 
-#define COMPAT_NAME_SAY      "cowsay"
-#define COMPAT_NAME_THINK    "cowthink"
-
 #include <stdio.h>
 #include <wchar.h>
 
 typedef struct {
-    wchar_t top_left;
-    wchar_t top;
-    wchar_t top_right;
-    wchar_t left;
-    wchar_t right;
-    wchar_t bottom_left;
-    wchar_t bottom;
-    wchar_t bottom_right;
-} border_t;
-
-typedef struct {
     int               mode;
-    const border_t*   border;
     char*             eye;
     char*             tongue;
 } COWOPT;
@@ -101,18 +90,11 @@ typedef struct COW {
     int     lines;
     int     (*open)(struct COW** cow, char* file);
     int     (*read)(struct COW** cow);
-    int     (*print)(struct COW* cow, COWOPT* clsay);
+    int     (*print)(struct COW* cow);
     void    (*release)(struct COW* cow);
 } COW;
 
 extern int init_cow(COW** cow);
-
-/* border sets
- */
-extern const border_t default_border;
-extern const border_t unicode_border;
-extern const border_t bold_border;
-extern const border_t rounded_border;
 
 #ifdef  __cplusplus
 }

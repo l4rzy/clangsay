@@ -17,6 +17,8 @@ extern "C" {
 /* __cplusplus */
 #endif
 
+#include "clangsay.h"
+
 typedef struct MSG {
     char**  data;
     int     lines;

@@ -12,6 +12,7 @@
 
 #include "./config.h"
 #include "./cow.h"
+#include "clangsay.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +33,8 @@
 /* WITH_SHARED */
 #endif
 
+extern clangsay_opt_t opt;
+
 struct  reptarg {
     int     mode;
     char*   haystack;
@@ -40,7 +43,7 @@ struct  reptarg {
 
 static int open_cow(COW** cow, char* file);
 static int read_cow(COW** cow);
-static int print_cow(COW* cow, COWOPT* opt);
+static int print_cow(COW* cow);
 static void release_cow(COW* cow);
 
 static void replace_escaped_backslash(char* str);
@@ -184,7 +187,7 @@ ERR:
 }
 
 static
-int print_cow(COW* cow, COWOPT* opt)
+int print_cow(COW* cow)
 {
     int     i       = 0,
             j       = 0;
@@ -195,7 +198,7 @@ int print_cow(COW* cow, COWOPT* opt)
 
     /* eyes table */
     struct  reptarg eyes[] = {
-        {MODE_M_EYE,    EYES,   opt->eye},
+        {MODE_M_EYE,    EYES,   opt.cow.eye},
         {MODE_BORG,     EYES,   BORG_EYES},
         {MODE_DEAD,     EYES,   DEAD_EYES},
         {MODE_GREEDY,   EYES,   GREEDY_EYES},
@@ -208,7 +211,7 @@ int print_cow(COW* cow, COWOPT* opt)
     };
     /* tongue table */
     struct  reptarg tongue[] = {
-        {MODE_M_TONGUE, TONGUE, opt->tongue},
+        {MODE_M_TONGUE, TONGUE, opt.cow.tongue},
         {MODE_DEAD,     TONGUE, DEAD_TONGUE},
         {MODE_STONED,   TONGUE, DEAD_TONGUE},
         {0,             NULL,   NULL},
@@ -219,11 +222,11 @@ int print_cow(COW* cow, COWOPT* opt)
      * 2. --say
      * 3. --think
      */
-    if (!(opt->mode & MODE_SAY) && !(opt->mode & MODE_THINK))
+    if (!(opt.cow.mode & MODE_SAY) && !(opt.cow.mode & MODE_THINK))
         though = SAY_THOUGHTS;
-    else if (opt->mode & MODE_SAY)
+    else if (opt.cow.mode & MODE_SAY)
         though = SAY_THOUGHTS;
-    else if (opt->mode & MODE_THINK)
+    else if (opt.cow.mode & MODE_THINK)
         though = THINK_THOUGHTS;
 
     /* print cow */
@@ -236,7 +239,7 @@ int print_cow(COW* cow, COWOPT* opt)
         /* replace eyes*/
         j = 0;
         while (eyes[j].haystack != NULL || eyes[j].needle != NULL) {
-            if (opt->mode & eyes[j].mode)
+            if (opt.cow.mode & eyes[j].mode)
                 strrep(*(cow->data + i), eyes[j].haystack, eyes[j].needle);
             j++;
         }
@@ -246,7 +249,7 @@ int print_cow(COW* cow, COWOPT* opt)
         /* replace tongue */
         j = 0;
         while (tongue[j].haystack != NULL || tongue[j].needle != NULL) {
-            if (opt->mode & tongue[j].mode)
+            if (opt.cow.mode & tongue[j].mode)
                 strrep(*(cow->data + i), tongue[j].haystack, tongue[j].needle);
             j++;
         }
@@ -261,8 +264,12 @@ int print_cow(COW* cow, COWOPT* opt)
         } else if (strstr(*(cow->data + i), "EOC") && block == 1) {
             block = 0;
         }
-        if (block == 1)
-            wprintf(L"%s\n", *(cow->data + i));
+        if (block == 1) {
+            if (opt.unicode)
+                wprintf(L"%s\n", *(cow->data + i));
+            else
+                printf("%s\n", *(cow->data + i));
+        }
         i++;
     }
 
